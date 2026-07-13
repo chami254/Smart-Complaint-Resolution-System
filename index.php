@@ -4,7 +4,7 @@
 
     <div class="hero-content">
 
-        <img src="images/logo.png" alt="SCRS Logo">
+        <img src="assets/images/logo.png" alt="SCRS Logo">
 
         <h1>Smart Complaint Resolution System</h1>
 

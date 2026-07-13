@@ -33,7 +33,7 @@ function isActive($page)
     <link rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
 
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="assets/css/style.css">
 
 </head>
 
@@ -43,7 +43,7 @@ function isActive($page)
 
     <a href="index.php" class="logo">
 
-        <img src="images/logo.png" alt="SCRS Logo">
+        <img src="assets/images/logo.png" alt="SCRS Logo">
 
     </a>
 

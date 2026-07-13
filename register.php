@@ -143,7 +143,7 @@ include 'includes/header.php';
 
             <div class="auth-logo">
 
-                <img src="images/logo.png" alt="SCRS Logo">
+                <img src="assets/images/logo.png" alt="SCRS Logo">
 
                 <h2>Create Your Account</h2>
 
