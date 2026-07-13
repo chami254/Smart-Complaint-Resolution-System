@@ -4,42 +4,48 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-/**
- * Check if a user is logged in
- */
-function isLoggedIn()
-{
-    return isset($_SESSION['user_id']);
-}
+/*=====================================
+    REDIRECT IF LOGGED IN
+=====================================*/
 
-/**
- * Redirect if user is not logged in
- */
-function requireLogin()
+function redirectIfLoggedIn()
 {
-    if (!isLoggedIn()) {
-        header("Location: ../login.php");
+    if (isset($_SESSION['user_id'])) {
+
+        if ($_SESSION['role'] === 'admin') {
+            header("Location: admin/dashboard.php");
+        } else {
+            header("Location: customer/dashboard.php");
+        }
+
         exit();
     }
 }
 
-/**
- * Redirect logged-in users away from login/register pages
- */
-function redirectIfLoggedIn()
+/*=====================================
+    REQUIRE LOGIN
+=====================================*/
+
+function requireLogin()
 {
-    if (isLoggedIn()) {
+    if (!isset($_SESSION['user_id'])) {
 
-        if ($_SESSION['role'] == 'admin') {
-
-            header("Location: admin/dashboard.php");
-
-        } else {
-
-            header("Location: customer/dashboard.php");
-
-        }
-
+        header("Location: ../login.php");
         exit();
+
+    }
+}
+
+/*=====================================
+    REQUIRE ROLE
+=====================================*/
+
+function requireRole($role)
+{
+    if ($_SESSION['role'] !== $role) {
+
+        header("Location: ../login.php");
+        exit();
+
     }
 }
