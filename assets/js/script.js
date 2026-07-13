@@ -102,3 +102,25 @@ confirm.addEventListener("keyup",()=>{
   }
 
 });
+
+const attachment = document.getElementById("attachment");
+
+const fileName = document.getElementById("file-name");
+
+if (attachment) {
+
+    attachment.addEventListener("change", function () {
+
+        if (this.files.length > 0) {
+
+            fileName.textContent = this.files[0].name;
+
+        } else {
+
+            fileName.textContent = "No file selected";
+
+        }
+
+    });
+
+}

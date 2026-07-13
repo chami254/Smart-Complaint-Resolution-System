@@ -4,48 +4,54 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-/*=====================================
-    REDIRECT IF LOGGED IN
-=====================================*/
+/*=========================================
+LOGIN CHECK
+=========================================*/
 
-function redirectIfLoggedIn()
+function isLoggedIn()
 {
-    if (isset($_SESSION['user_id'])) {
-
-        if ($_SESSION['role'] === 'admin') {
-            header("Location: admin/dashboard.php");
-        } else {
-            header("Location: customer/dashboard.php");
-        }
-
-        exit();
-    }
+    return isset($_SESSION['user_id']);
 }
 
-/*=====================================
-    REQUIRE LOGIN
-=====================================*/
+/*=========================================
+REQUIRE LOGIN
+=========================================*/
 
 function requireLogin()
 {
-    if (!isset($_SESSION['user_id'])) {
+    if (!isLoggedIn()) {
 
         header("Location: ../login.php");
         exit();
-
     }
 }
 
-/*=====================================
-    REQUIRE ROLE
-=====================================*/
+/*=========================================
+CUSTOMER ACCESS
+=========================================*/
 
-function requireRole($role)
+function requireCustomer()
 {
-    if ($_SESSION['role'] !== $role) {
+    requireLogin();
+
+    if ($_SESSION['role'] !== "customer") {
 
         header("Location: ../login.php");
         exit();
+    }
+}
 
+/*=========================================
+ADMIN ACCESS
+=========================================*/
+
+function requireAdmin()
+{
+    requireLogin();
+
+    if ($_SESSION['role'] !== "admin") {
+
+        header("Location: ../login.php");
+        exit();
     }
 }

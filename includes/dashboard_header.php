@@ -52,13 +52,14 @@ $pageTitle = $pageTitle ?? "Dashboard";
 
             </span>
 
-            <a href="../logout.php" class="logout-btn">
+            <a href="#"
+                id="logoutBtn"
+                class="logout-btn">
 
                 <i class="fa-solid fa-right-from-bracket"></i>
 
-                Logout
-
-            </a>
+                    Logout
+                </a>
 
         </div>
 

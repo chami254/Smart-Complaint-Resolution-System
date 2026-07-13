@@ -10,7 +10,7 @@ $isAdmin = ($_SESSION['role'] === "admin");
 
         <img src="../assets/images/logo.png" alt="SCRS Logo">
 
-        <h3>SCRS</h3>
+        
 
     </div>
 

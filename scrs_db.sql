@@ -48,6 +48,8 @@ CREATE TABLE IF NOT EXISTS complaints (
     assigned_to INT DEFAULT NULL,
 
     resolution_notes TEXT,
+    
+    attachment VARCHAR(255),
 
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
