@@ -4,7 +4,6 @@ require_once '../config/db.php';
 require_once '../includes/authentication.php';
 
 requireLogin();
-requireRole('customer');
 
 $pageTitle = "Submit Complaint";
 $activePage = "submit";

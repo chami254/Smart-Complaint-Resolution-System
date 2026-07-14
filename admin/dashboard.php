@@ -3,7 +3,6 @@
 require_once '../includes/authentication.php';
 
 requireLogin();
-requireRole('admin');
 
 $pageTitle = "Admin Dashboard";
 $activePage = "dashboard";

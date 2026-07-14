@@ -4,7 +4,6 @@ require_once 'config/db.php';
 require_once 'includes/authentication.php';
 
 // Redirect logged-in users away
-redirectIfLoggedIn();
 
 /*=====================================
     VARIABLES
