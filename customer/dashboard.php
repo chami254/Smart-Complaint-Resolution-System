@@ -1,8 +1,9 @@
 <?php
 
 require_once '../includes/authentication.php';
+require_once "../config/db.php";
 
-requireLogin();
+requireCustomer();
 
 $pageTitle = "Customer Dashboard";
 $activePage = "dashboard";
@@ -23,8 +24,51 @@ if ($hour < 12) {
 
 }
 
+
 include '../includes/dashboard_header.php';
 include '../includes/dashboard_sidebar.php';
+
+/*=========================================
+CUSTOMER DASHBOARD STATISTICS
+=========================================*/
+
+$userId = $_SESSION['user_id'];
+
+$stmt = $conn->prepare("
+    SELECT
+        COUNT(*) AS total,
+        SUM(status='Pending') AS pending,
+        SUM(status='In Progress') AS in_progress,
+        SUM(status='Resolved') AS resolved
+    FROM complaints
+    WHERE user_id = ?
+");
+
+$stmt->execute([$userId]);
+
+$stats = $stmt->fetch(PDO::FETCH_ASSOC);
+
+/*=========================================
+RECENT COMPLAINTS
+=========================================*/
+
+$stmt = $conn->prepare("
+    SELECT
+        id,
+        ticket_no,
+        title,
+        status,
+        created_at
+    FROM complaints
+    WHERE user_id = ?
+    ORDER BY created_at DESC
+    LIMIT 5
+");
+
+$stmt->execute([$userId]);
+
+$recentComplaints = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
 
 ?>
 
@@ -58,7 +102,7 @@ include '../includes/dashboard_sidebar.php';
 
         <div class="stat-card">
 
-            <h2>0</h2>
+            <h2><?= $stats['total'] ?? 0 ?></h2>
 
             <p>Total Complaints</p>
 
@@ -66,7 +110,7 @@ include '../includes/dashboard_sidebar.php';
 
         <div class="stat-card">
 
-            <h2>0</h2>
+            <h2><?= $stats['pending'] ?? 0 ?></h2>
 
             <p>Pending</p>
 
@@ -74,7 +118,7 @@ include '../includes/dashboard_sidebar.php';
 
         <div class="stat-card">
 
-            <h2>0</h2>
+            <h2><?= $stats['in_progress'] ?? 0 ?></h2>
 
             <p>In Progress</p>
 
@@ -82,7 +126,7 @@ include '../includes/dashboard_sidebar.php';
 
         <div class="stat-card">
 
-            <h2>0</h2>
+            <h2><?= $stats['resolved'] ?? 0 ?></h2>
 
             <p>Resolved</p>
 
@@ -112,7 +156,7 @@ include '../includes/dashboard_sidebar.php';
 
                 <tr>
 
-                    <th>ID</th>
+                    <th>Ticket No.</th>
 
                     <th>Subject</th>
 
@@ -126,17 +170,82 @@ include '../includes/dashboard_sidebar.php';
 
             <tbody>
 
-                <tr>
+                <?php if(!empty($recentComplaints)): ?>
 
-                    <td colspan="4">
+                    <?php foreach($recentComplaints as $complaint): ?>
 
-                        You haven't submitted any complaints yet.
+                        <?php
 
-                    </td>
+                        switch($complaint['status']){
 
-                </tr>
+                            case "Pending":
+                                $statusClass="pending";
+                                break;
 
-            </tbody>
+                            case "In Progress":
+                                $statusClass="progress";
+                                break;
+
+                            case "Resolved":
+                                $statusClass="resolved";
+                                break;
+
+                            default:
+                                $statusClass="closed";
+
+                        }
+
+                        ?>
+
+                        <tr>
+
+                            <td>
+
+                                <?= htmlspecialchars($complaint['ticket_no']) ?>
+
+                            </td>
+
+                            <td>
+
+                                <?= htmlspecialchars($complaint['title']) ?>
+
+                            </td>
+
+                            <td>
+
+                                <span class="status-badge <?= $statusClass ?>">
+
+                                    <?= htmlspecialchars($complaint['status']) ?>
+
+                                </span>
+
+                            </td>
+
+                            <td>
+
+                                <?= date("d M Y", strtotime($complaint['created_at'])) ?>
+
+                            </td>
+
+                        </tr>
+
+                    <?php endforeach; ?>
+
+                <?php else: ?>
+
+                    <tr>
+
+                        <td colspan="4">
+
+                            You haven't submitted any complaints yet.
+
+                        </td>
+
+                    </tr>
+
+                <?php endif; ?>
+
+                </tbody>
 
         </table>
 

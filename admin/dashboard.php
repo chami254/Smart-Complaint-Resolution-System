@@ -1,8 +1,9 @@
 <?php
 
 require_once '../includes/authentication.php';
+require_once "../config/db.php";
 
-requireLogin();
+requireAdmin();
 
 $pageTitle = "Admin Dashboard";
 $activePage = "dashboard";
@@ -25,6 +26,50 @@ if ($hour < 12) {
 
 include '../includes/dashboard_header.php';
 include '../includes/dashboard_sidebar.php';
+
+/*=========================================
+ADMIN DASHBOARD STATISTICS
+=========================================*/
+
+// Total Users
+$stmt = $conn->query("
+    SELECT COUNT(*) AS total_users
+    FROM users
+");
+
+$totalUsers = $stmt->fetch(PDO::FETCH_ASSOC)['total_users'];
+
+// Complaint Statistics
+$stmt = $conn->query("
+    SELECT
+        COUNT(*) AS total_complaints,
+        SUM(status='Pending') AS pending,
+        SUM(status='Resolved') AS resolved
+    FROM complaints
+");
+
+$complaintStats = $stmt->fetch(PDO::FETCH_ASSOC);
+
+// Latest Complaints
+$stmt = $conn->query("
+    SELECT
+        complaints.id,
+        complaints.title,
+        complaints.status,
+        complaints.created_at,
+        users.full_name
+    FROM complaints
+    INNER JOIN users
+        ON complaints.user_id = users.id
+    ORDER BY complaints.created_at DESC
+    LIMIT 5
+");
+
+$recentComplaints = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+
+
+$stats = $stmt->fetch(PDO::FETCH_ASSOC);
 
 ?>
 
@@ -58,7 +103,7 @@ include '../includes/dashboard_sidebar.php';
 
         <div class="stat-card">
 
-            <h2>0</h2>
+            <h2><?= $totalUsers ?></h2>
 
             <p>Registered Users</p>
 
@@ -66,7 +111,7 @@ include '../includes/dashboard_sidebar.php';
 
         <div class="stat-card">
 
-            <h2>0</h2>
+            <h2><?= $complaintStats['total_complaints'] ?? 0 ?></h2>
 
             <p>Total Complaints</p>
 
@@ -74,7 +119,7 @@ include '../includes/dashboard_sidebar.php';
 
         <div class="stat-card">
 
-            <h2>0</h2>
+            <h2><?= $complaintStats['pending'] ?? 0 ?></h2>
 
             <p>Pending</p>
 
@@ -82,7 +127,7 @@ include '../includes/dashboard_sidebar.php';
 
         <div class="stat-card">
 
-            <h2>0</h2>
+            <h2><?= $complaintStats['resolved'] ?? 0 ?></h2>
 
             <p>Resolved</p>
 
@@ -118,6 +163,75 @@ include '../includes/dashboard_sidebar.php';
 
             <tbody>
 
+                <?php if(!empty($recentComplaints)): ?>
+
+                    <?php foreach($recentComplaints as $complaint): ?>
+
+                        <?php
+
+                        switch($complaint['status']){
+
+                            case "Pending":
+                                $statusClass="pending";
+                                break;
+
+                            case "In Progress":
+                                $statusClass="progress";
+                                break;
+
+                            case "Resolved":
+                                $statusClass="resolved";
+                                break;
+
+                            default:
+                                $statusClass="closed";
+
+                        }
+
+                        ?>
+
+                        <tr>
+
+                            <td>
+
+                                <?= htmlspecialchars($complaint['id']) ?>
+
+                            </td>
+
+                            <td>
+
+                                <?= htmlspecialchars($complaint['full_name']) ?>
+
+                            </td>
+
+                            <td>
+
+                                <?= htmlspecialchars($complaint['title']) ?>
+
+                            </td>
+
+                            <td>
+
+                                <span class="status-badge <?= $statusClass ?>">
+
+                                    <?= htmlspecialchars($complaint['status']) ?>
+
+                                </span>
+
+                            </td>
+
+                            <td>
+
+                                <?= date("d M Y", strtotime($complaint['created_at'])) ?>
+
+                            </td>
+
+                        </tr>
+
+                    <?php endforeach; ?>
+
+                <?php else: ?>
+
                 <tr>
 
                     <td colspan="5">
@@ -128,7 +242,9 @@ include '../includes/dashboard_sidebar.php';
 
                 </tr>
 
-            </tbody>
+                <?php endif; ?>
+
+                </tbody>
 
         </table>
 
@@ -150,7 +266,7 @@ include '../includes/dashboard_sidebar.php';
 
             </a>
 
-            <a href="users.php" class="action-card">
+            <a href="user.php" class="action-card">
 
                 <i class="fa-solid fa-users"></i>
 

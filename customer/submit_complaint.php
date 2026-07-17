@@ -3,7 +3,7 @@
 require_once '../config/db.php';
 require_once '../includes/authentication.php';
 
-requireLogin();
+requireCustomer();
 
 $pageTitle = "Submit Complaint";
 $activePage = "submit";

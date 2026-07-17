@@ -11,14 +11,17 @@ requireAdmin();
 VALIDATE COMPLAINT ID
 =========================================*/
 
-if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
+if (
+    !isset($_GET["id"]) ||
+    !is_numeric($_GET["id"])
+) {
 
     header("Location: complaints.php");
     exit();
 
 }
 
-$complaintId = (int) $_GET['id'];
+$complaintId = (int) $_GET["id"];
 
 /*=========================================
 LOAD COMPLAINT DETAILS
@@ -27,7 +30,9 @@ LOAD COMPLAINT DETAILS
 $stmt = $conn->prepare("
 
     SELECT
+
         complaints.*,
+
         customer.full_name AS customer_name
 
     FROM complaints
@@ -58,12 +63,14 @@ LOAD ADMINISTRATORS
 $stmt = $conn->prepare("
 
     SELECT
+
         id,
+
         full_name
 
     FROM users
 
-    WHERE role='admin'
+    WHERE role = 'admin'
 
     ORDER BY full_name
 
@@ -77,20 +84,21 @@ $admins = $stmt->fetchAll(PDO::FETCH_ASSOC);
 UPDATE COMPLAINT
 =========================================*/
 
-$success = "";
 $errors = [];
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
-    $assigned_to = !empty($_POST["assigned_to"])
-        ? $_POST["assigned_to"]
-        : null;
+    $status = trim($_POST["status"] ?? "");
 
-    $status = trim($_POST["status"]);
+    $priority = trim($_POST["priority"] ?? "");
 
-    $priority = trim($_POST["priority"]);
+    $resolution_notes = trim($_POST["resolution_notes"] ?? "");
 
-    $resolution_notes = trim($_POST["resolution_notes"]);
+    $assigned_to = $_POST["assigned_to"] ?? "";
+
+    /*-----------------------------
+    Validation
+    -----------------------------*/
 
     if (empty($status)) {
 
@@ -103,6 +111,42 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $errors[] = "Priority is required.";
 
     }
+
+    /*-----------------------------
+    Validate Administrator
+    -----------------------------*/
+
+    if ($assigned_to === "") {
+
+        $assigned_to = null;
+
+    } else {
+
+        $check = $conn->prepare("
+
+            SELECT id
+
+            FROM users
+
+            WHERE id = ?
+
+            AND role = 'admin'
+
+        ");
+
+        $check->execute([$assigned_to]);
+
+        if (!$check->fetch()) {
+
+            $errors[] = "Invalid administrator selected.";
+
+        }
+
+    }
+
+    /*-----------------------------
+    Update Complaint
+    -----------------------------*/
 
     if (empty($errors)) {
 
@@ -282,11 +326,29 @@ include "../includes/dashboard_sidebar.php";
 
                     <select name="assigned_to">
 
-                        <option>Unassigned</option>
+    <option value="">
 
-                        <option>Administrator</option>
+        Unassigned
 
-                    </select>
+    </option>
+
+    <?php foreach ($admins as $admin): ?>
+
+        <option
+
+            value="<?= $admin['id']; ?>"
+
+            <?= ($complaint['assigned_to'] == $admin['id']) ? "selected" : ""; ?>
+
+        >
+
+            <?= htmlspecialchars($admin['full_name']); ?>
+
+        </option>
+
+    <?php endforeach; ?>
+
+</select>
 
                 </div>
 
